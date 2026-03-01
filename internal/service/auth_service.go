@@ -19,6 +19,7 @@ var (
 type JWTClaims struct {
 	UserID string `json:"user_id"`
 	Email  string `json:"email"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -41,6 +42,7 @@ func (s *AuthService) GenerateToken(user *models.User) (string, error) {
 	claims := JWTClaims{
 		UserID: user.ID,
 		Email:  user.Email,
+		Role:   user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.tokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

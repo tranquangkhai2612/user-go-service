@@ -85,11 +85,17 @@ func main() {
 	// Protected user routes
 	protected := api.PathPrefix("").Subrouter()
 	protected.Use(jwtMiddleware.Authenticate)
-	protected.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
+
+	// Admin-only routes (create, update, delete users)
+	adminRoutes := protected.PathPrefix("").Subrouter()
+	adminRoutes.Use(jwtMiddleware.RequireRole("admin"))
+	adminRoutes.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
+	adminRoutes.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT")
+	adminRoutes.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
+
+	// User routes (view users)
 	protected.HandleFunc("/users", userHandler.GetUsers).Methods("GET")
 	protected.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
-	protected.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT")
-	protected.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
 
 	// Swagger UI
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)

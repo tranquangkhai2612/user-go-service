@@ -17,4 +17,5 @@ type RegisterRequest struct {
 	Email    string `json:"email" example:"john.doe@example.com"`
 	Name     string `json:"name" example:"John Doe"`
 	Password string `json:"password" example:"securePassword123"`
+	Role     string `json:"role,omitempty" example:"user"` // Optional, defaults to 'user'
 }

@@ -133,12 +133,12 @@ func NewMySQLUserRepository(db *sql.DB) UserRepository {
 
 // Create adds a new user to the database
 func (r *MySQLUserRepository) Create(user *models.User) error {
-	query := `INSERT INTO users (id, email, name, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO users (id, email, name, role, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
 
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
-	_, err := r.db.Exec(query, user.ID, user.Email, user.Name, user.Password, user.CreatedAt, user.UpdatedAt)
+	_, err := r.db.Exec(query, user.ID, user.Email, user.Name, user.Role, user.Password, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -148,10 +148,10 @@ func (r *MySQLUserRepository) Create(user *models.User) error {
 
 // GetByID retrieves a user by ID from the database
 func (r *MySQLUserRepository) GetByID(id string) (*models.User, error) {
-	query := `SELECT id, email, name, password, created_at, updated_at FROM users WHERE id = ?`
+	query := `SELECT id, email, name, role, password, created_at, updated_at FROM users WHERE id = ?`
 
 	user := &models.User{}
-	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Name, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Name, &user.Role, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrUserNotFound
@@ -164,10 +164,10 @@ func (r *MySQLUserRepository) GetByID(id string) (*models.User, error) {
 
 // GetByEmail retrieves a user by email from the database
 func (r *MySQLUserRepository) GetByEmail(email string) (*models.User, error) {
-	query := `SELECT id, email, name, password, created_at, updated_at FROM users WHERE email = ?`
+	query := `SELECT id, email, name, role, password, created_at, updated_at FROM users WHERE email = ?`
 
 	user := &models.User{}
-	err := r.db.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Name, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := r.db.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Name, &user.Role, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrUserNotFound
@@ -180,7 +180,7 @@ func (r *MySQLUserRepository) GetByEmail(email string) (*models.User, error) {
 
 // GetAll retrieves all users from the database
 func (r *MySQLUserRepository) GetAll() ([]*models.User, error) {
-	query := `SELECT id, email, name, password, created_at, updated_at FROM users ORDER BY created_at DESC`
+	query := `SELECT id, email, name, role, password, created_at, updated_at FROM users ORDER BY created_at DESC`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -191,7 +191,7 @@ func (r *MySQLUserRepository) GetAll() ([]*models.User, error) {
 	users := make([]*models.User, 0)
 	for rows.Next() {
 		user := &models.User{}
-		err := rows.Scan(&user.ID, &user.Email, &user.Name, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Email, &user.Name, &user.Role, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

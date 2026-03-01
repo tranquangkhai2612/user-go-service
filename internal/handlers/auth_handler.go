@@ -47,6 +47,15 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate and set role (default to 'user' if not provided or invalid)
+	role := req.Role
+	if role == "" {
+		role = models.RoleUser
+	} else if role != models.RoleUser && role != models.RoleAdmin {
+		respondWithError(w, http.StatusBadRequest, "Invalid role: must be 'user' or 'admin'")
+		return
+	}
+
 	// Hash password
 	hashedPassword, err := h.authService.HashPassword(req.Password)
 	if err != nil {
@@ -59,6 +68,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		ID:       uuid.New().String(),
 		Email:    req.Email,
 		Name:     req.Name,
+		Role:     role,
 		Password: hashedPassword,
 	}
 

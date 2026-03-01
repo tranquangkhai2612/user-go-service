@@ -56,6 +56,36 @@ func (m *JWTMiddleware) Authenticate(next http.Handler) http.Handler {
 	})
 }
 
+// RequireRole is a middleware that restricts access based on user role
+func (m *JWTMiddleware) RequireRole(roles ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Get claims from context (set by Authenticate middleware)
+			claims, ok := r.Context().Value(UserContextKey).(*service.JWTClaims)
+			if !ok {
+				respondWithError(w, http.StatusUnauthorized, "Unauthorized")
+				return
+			}
+
+			// Check if user has required role
+			hasRole := false
+			for _, role := range roles {
+				if claims.Role == role {
+					hasRole = true
+					break
+				}
+			}
+
+			if !hasRole {
+				respondWithError(w, http.StatusForbidden, "Access denied: insufficient permissions")
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 // respondWithError sends an error response
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	w.Header().Set("Content-Type", "application/json")
